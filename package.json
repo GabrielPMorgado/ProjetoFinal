@@ -1,0 +1,24 @@
+{
+  "name": "projetofinal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GabrielPMorgado/projetoFinal.git"
+  },
+  "author": "Gabriel Morgado",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GabrielPMorgado/projetoFinal/issues"
+  },
+  "homepage": "https://github.com/GabrielPMorgado/projetoFinal#readme",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
