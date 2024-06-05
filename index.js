@@ -1,29 +1,36 @@
 import express from 'express';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 
 const host = '0.0.0.0';
-const port = 3000;
+const port = process.env.PORT || 3000;
 const app = express();
 
 let listaUsuarios = [];
 let listaPets = [];
 
+// __dirname replacement in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(session({
-    secret: 'minhaChave123', 
+    secret: 'minhaChave123',
     resave: true,
     saveUninitialized: true,
-    cookie: { 
-        maxAge: 1000 * 60 * 15 // 15 minutes
-    }
+    cookie: { maxAge: 1000 * 60 * 15 } // 15 minutes
 }));
+
+// Middleware to serve static files
+const staticPath = path.join(__dirname, 'pagina');
+app.use(express.static(staticPath));
 
 function usuarioEstaAutenticado(req, res, next) {
     if (req.session.usuarioAutenticado) {
-        next(); 
+        next();
     } else {
         res.redirect('/login.html');
     }
@@ -134,22 +141,19 @@ function autenticarUsuario(req, res) {
 }
 
 app.post('/login', autenticarUsuario);
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(process.cwd(), 'pagina', 'index.html'));
+
+app.get('/login.html', (req, res) => {
+    res.sendFile(path.join(staticPath, 'login.html'));
 });
 
 app.get('/logout', (req, res) => {
     req.session.destroy();
-    res.redirect('/index.html');
+    res.redirect('/login.html');
 });
 
-// Root route
 app.get('/', usuarioEstaAutenticado, (req, res) => {
-    res.sendFile(path.join(process.cwd(), 'pagina', 'index.html'));
+    res.sendFile(path.join(staticPath, 'index.html'));
 });
-
-app.use(express.static(path.join(process.cwd(), 'pagina')));
-app.use('/protegido', usuarioEstaAutenticado, express.static(path.join(process.cwd(), 'protegido')));
 
 app.post('/formulario', usuarioEstaAutenticado, cadastrarUsuario);
 app.post('/cadastrarUsuario', usuarioEstaAutenticado, cadastrarUsuario);
@@ -242,7 +246,7 @@ app.get('/listarUsuarios', usuarioEstaAutenticado, (req, res) => {
                 </tr>
             </thead>
             <tbody>`;
-    
+
     listaUsuarios.forEach(usuario => {
         conteudoResposta += `
             <tr>
@@ -259,7 +263,7 @@ app.get('/listarUsuarios', usuarioEstaAutenticado, (req, res) => {
             <a href="/" class="button voltar">Voltar</a>
             <a href="./formulario.html" class="button cadastrar">Continuar Cadastrando</a>
         </div>`;
-    
+
     if (req.cookies.dataUltimoAcesso) {
         conteudoResposta += `
             <p>Seu último acesso foi em ${req.cookies.dataUltimoAcesso}</p>`;
